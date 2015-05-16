@@ -18,65 +18,7 @@ app.use(bodyParser.json());
 /**
  * New router for books
  */
-var bookRouter = express.Router();
-
-// GET /books
-bookRouter.route('/books')
-    // http://localhost:8000/api/books -> {"hello":"my api"}
-    .get(function (req, res) {
-        // call this function whenever this route is called
-
-        // 1. sending simple object
-        // var responseJson = {hello: 'my api'};
-        // res.json(responseJson);
-
-        // 2. get all books from DB
-        /* Book.find(function(err, books) {
-         if (err) {
-         console.log(err);
-         res.status(500).send(err);
-         } else {
-         // send json to client
-         res.json(books);
-         }
-         }); */
-
-        // 3. get books using params/filtering
-        var query = req.query;
-        // sanitize query - make it available only for genre
-        if (req.query.genre) {
-            query.genre = req.query.genre;
-        }
-        // http://localhost:3000/api/books?genre=Science -> [...]
-        Book.find(function (query, err, books) {
-            if (err) {
-                console.log(err);
-                res.status(500).send(err);
-            } else {
-                // send json to client
-                res.json(books);
-            }
-        });
-    })
-    .post(function (req, res) {
-        // create a new Book
-        var book = new Book(req.body);
-        console.log(book);
-        res.send(book);
-    });
-
-// GET /books/123
-bookRouter.route('/books/:bookId')
-    // http://localhost:3000/api/books/1 -> {...}
-    .get(function (req, res) {
-        Book.findById(req.params.bookId, function (query, err, book) {
-            if (err) {
-                res.status(500).send(err);
-            } else {
-                res.json(book);
-            }
-        });
-    });
+var bookRouter = require('./Routes/bookRoutes')(Book);
 
 // root
 app.get('/', function (req, res) {
@@ -88,4 +30,4 @@ app.listen(port, function () {
     console.log('Gulp is running my app on port: ', port);
 });
 
-app.use('/api', bookRouter);
+app.use('/api/books', bookRouter);
