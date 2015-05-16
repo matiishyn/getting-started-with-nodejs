@@ -1,5 +1,6 @@
 var express = require('express'),
-    mongoose = require('mongoose');
+    mongoose = require('mongoose'),
+    bodyParser = require('body-parser'); // parses data from post request
 
 var app = express();
 
@@ -11,21 +12,15 @@ var Book = require('./models/bookModel');
 
 var port = process.env.PORT || 3000;
 
-// root
-app.get('/', function (req, res) {
-    res.send('welcome to my API');
-});
-
-app.listen(port, function () {
-    // app started listening
-    console.log('Gulp is running my app on port: ', port);
-});
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.json());
 
 /**
  * New router for books
  */
 var bookRouter = express.Router();
 
+// GET /books
 bookRouter.route('/books')
     // http://localhost:8000/api/books -> {"hello":"my api"}
     .get(function (req, res) {
@@ -37,14 +32,14 @@ bookRouter.route('/books')
 
         // 2. get all books from DB
         /* Book.find(function(err, books) {
-            if (err) {
-                console.log(err);
-                res.status(500).send(err);
-            } else {
-                // send json to client
-                res.json(books);
-            }
-        }); */
+         if (err) {
+         console.log(err);
+         res.status(500).send(err);
+         } else {
+         // send json to client
+         res.json(books);
+         }
+         }); */
 
         // 3. get books using params/filtering
         var query = req.query;
@@ -53,7 +48,7 @@ bookRouter.route('/books')
             query.genre = req.query.genre;
         }
         // http://localhost:3000/api/books?genre=Science -> [...]
-        Book.find(function(query, err, books) {
+        Book.find(function (query, err, books) {
             if (err) {
                 console.log(err);
                 res.status(500).send(err);
@@ -62,7 +57,35 @@ bookRouter.route('/books')
                 res.json(books);
             }
         });
+    })
+    .post(function (req, res) {
+        // create a new Book
+        var book = new Book(req.body);
+        console.log(book);
+        res.send(book);
     });
-//.post()
+
+// GET /books/123
+bookRouter.route('/books/:bookId')
+    // http://localhost:3000/api/books/1 -> {...}
+    .get(function (req, res) {
+        Book.findById(req.params.bookId, function (query, err, book) {
+            if (err) {
+                res.status(500).send(err);
+            } else {
+                res.json(book);
+            }
+        });
+    });
+
+// root
+app.get('/', function (req, res) {
+    res.send('welcome to my API');
+});
+
+app.listen(port, function () {
+    // app started listening
+    console.log('Gulp is running my app on port: ', port);
+});
 
 app.use('/api', bookRouter);
