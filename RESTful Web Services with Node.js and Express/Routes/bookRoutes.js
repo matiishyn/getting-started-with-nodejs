@@ -3,51 +3,13 @@ var express = require('express');
 var routes = function (Book) {
     var bookRouter = express.Router();
 
+    var bookController = require('../Controllers/bookController')(Book);
+
 // GET /books
     bookRouter.route('/')
         // http://localhost:8000/api/books -> {"hello":"my api"}
-        .get(function (req, res) {
-            // call this function whenever this route is called
-
-            // 1. sending simple object
-            // var responseJson = {hello: 'my api'};
-            // res.json(responseJson);
-
-            // 2. get all books from DB
-            /* Book.find(function(err, books) {
-             if (err) {
-             console.log(err);
-             res.status(500).send(err);
-             } else {
-             // send json to client
-             res.json(books);
-             }
-             }); */
-
-            // 3. get books using params/filtering
-            var query = req.query;
-            // sanitize query - make it available only for genre
-            if (req.query.genre) {
-                query.genre = req.query.genre;
-            }
-            // http://localhost:3000/api/books?genre=Science -> [...]
-            Book.find(query, function (err, books) {
-                if (err) {
-                    console.log(err);
-                    res.status(500).send(err);
-                } else {
-                    // send json to client
-                    res.json(books);
-                }
-            });
-        })
-        .post(function (req, res) {
-            // create a new Book
-            var book = new Book(req.body);
-            //console.log(book);
-            book.save(); // save in DB
-            res.status(201).send(book);
-        });
+        .get(bookController.get)
+        .post(bookController.post);
 
     // use middleware for route '/:bookId'
     bookRouter.use('/:bookId', function (req, res, next) {
