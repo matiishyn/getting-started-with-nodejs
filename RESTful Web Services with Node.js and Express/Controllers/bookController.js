@@ -2,9 +2,14 @@ var bookController = function (Book) {
     var post = function (req, res) {
         // create a new Book
         var book = new Book(req.body);
-        //console.log(book);
-        book.save(); // save in DB
-        res.status(201).send(book);
+        if(req.body.title) {
+            book.save(); // save in DB
+            res.status(201);
+            res.send(book);
+        } else {
+            res.status(400);
+            res.send('Title is required');
+        }
     };
 
     var get = function (req, res) {

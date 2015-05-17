@@ -5,7 +5,12 @@ var express = require('express'),
 var app = express();
 
 // connect to 'bookAPI' MongoDB database
-var db = mongoose.connect('mongodb://localhost/bookAPI');
+var db;
+if (process.env.ENV === 'Test') {
+    db = mongoose.connect('mongodb://localhost/bookAPI_test');
+} else {
+    db = mongoose.connect('mongodb://localhost/bookAPI');
+}
 
 // models for Book, instance of a Book Schema
 var Book = require('./models/bookModel');
@@ -31,3 +36,5 @@ app.listen(port, function () {
 });
 
 app.use('/api/books', bookRouter);
+
+module.exports = app;
